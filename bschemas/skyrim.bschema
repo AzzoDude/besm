@@ -1,0 +1,173 @@
+// ===================================================================
+//               BINARY SCHEMA SPECIFICATION (.bschema)
+// ===================================================================
+// File: skyrim.bschema
+// Extension: .bschema (Binary Schema Mapping Document)
+// ===================================================================
+
+header HEADER {
+    Magic             : UInt32  @ 0   // Magic signature ("BESM")
+    Version           : UInt32  @ 4   // Database specification version
+    NumTypes          : UInt32  @ 8   // Number of flat row sectors
+    Flags             : UInt32  @ 12  // Global database attribute flags
+    
+    // Core structural offsets pointing to high-level segments
+    ShadowDirOffset   : UInt64  @ 16  // Offset to O(1) binary-search index
+    StringTableOffset : UInt64  @ 24  // Offset to unique UTF-8 string heap
+    BlobPoolOffset    : UInt64  @ 32  // Offset to unmapped complex subrecords
+    Reserved          : Bytes24 @ 40  // Padded to match 64-byte L1 cache lines
+}
+
+base BaseRecord {
+    FormID     : UInt32 @ HEADER.12
+    Flags      : UInt32 @ HEADER.8
+}
+
+base EmptyRecord extends BaseRecord {
+    BlobOffset : UInt32 @ BlobOffset
+}
+
+// ===================================================================
+//                  SECTORS WITH CUSTOM FIELD MAPS
+// ===================================================================
+
+sector REFR : align(64) extends BaseRecord {
+    BaseID     : UInt32 @ NAME.0
+    X          : Float  @ DATA.0
+    Y          : Float  @ DATA.4
+    Z          : Float  @ DATA.8
+    RotX       : Float  @ DATA.12
+    RotY       : Float  @ DATA.16
+    RotZ       : Float  @ DATA.20
+    CellID     : UInt32 @ CELL.0
+    BlobOffset : UInt32 @ BlobOffset
+}
+
+sector WEAP : align(32) extends BaseRecord {
+    Weight     : Float  @ DATA.4
+    Value      : UInt32 @ DATA.0
+    Damage     : UInt32 @ DATA.8
+    Enchantment: UInt32 @ EITM.0
+    NameOffset : UInt32 @ FULL.StringIndex
+    EdidOffset : UInt32 @ EDID.StringIndex
+    BlobOffset : UInt32 @ BlobOffset
+}
+
+sector ARMO : align(32) extends BaseRecord {
+    Weight     : Float  @ DATA.4
+    Value      : UInt32 @ DATA.0
+    Enchantment: UInt32 @ EITM.0
+    NameOffset : UInt32 @ FULL.StringIndex
+    EdidOffset : UInt32 @ EDID.StringIndex
+    BlobOffset : UInt32 @ BlobOffset
+}
+
+sector ENCH : align(32) extends BaseRecord {
+    FirstEffect: UInt32 @ EFID.0
+    Magnitude  : Float  @ EFIT.0
+    Duration   : UInt32 @ EFIT.8
+    NameOffset : UInt32 @ FULL.StringIndex
+    EdidOffset : UInt32 @ EDID.StringIndex
+    BlobOffset : UInt32 @ BlobOffset
+}
+
+sector ALCH : align(32) extends BaseRecord {
+    Weight     : Float  @ ENIT.4
+    Value      : UInt32 @ ENIT.0
+    NameOffset : UInt32 @ FULL.StringIndex
+    EdidOffset : UInt32 @ EDID.StringIndex
+    BlobOffset : UInt32 @ BlobOffset
+}
+
+sector BOOK : align(32) extends BaseRecord {
+    Weight     : Float  @ DATA.8
+    Value      : UInt32 @ DATA.4
+    NameOffset : UInt32 @ FULL.StringIndex
+    EdidOffset : UInt32 @ EDID.StringIndex
+    BlobOffset : UInt32 @ BlobOffset
+}
+
+sector MISC : align(32) extends BaseRecord {
+    Weight     : Float  @ DATA.4
+    Value      : UInt32 @ DATA.0
+    NameOffset : UInt32 @ FULL.StringIndex
+    EdidOffset : UInt32 @ EDID.StringIndex
+    BlobOffset : UInt32 @ BlobOffset
+}
+
+sector KEYM : align(32) extends BaseRecord {
+    Weight     : Float  @ DATA.4
+    Value      : UInt32 @ DATA.0
+    NameOffset : UInt32 @ FULL.StringIndex
+    EdidOffset : UInt32 @ EDID.StringIndex
+    BlobOffset : UInt32 @ BlobOffset
+}
+
+sector AMMO : align(32) extends BaseRecord {
+    Weight     : Float  @ DATA.8
+    Value      : UInt32 @ DATA.4
+    Damage     : UInt32 @ DATA.12
+    NameOffset : UInt32 @ FULL.StringIndex
+    EdidOffset : UInt32 @ EDID.StringIndex
+    BlobOffset : UInt32 @ BlobOffset
+}
+
+sector NPC_ : align(32) extends BaseRecord {
+    NameOffset : UInt32 @ FULL.StringIndex
+    EdidOffset : UInt32 @ EDID.StringIndex
+    BlobOffset : UInt32 @ BlobOffset
+}
+
+sector LVLI : align(32) extends BaseRecord {
+    ChanceNone : UInt32 @ LVLD.0
+    EdidOffset : UInt32 @ EDID.StringIndex
+    BlobOffset : UInt32 @ BlobOffset
+}
+
+sector STAT : align(32) extends BaseRecord {
+    ModelOffset: UInt32 @ MODL.StringIndex
+    EdidOffset : UInt32 @ EDID.StringIndex
+    BlobOffset : UInt32 @ BlobOffset
+}
+
+sector COBJ : align(32) extends BaseRecord {
+    CreatedCount: UInt32 @ DATA.0
+    EdidOffset : UInt32 @ EDID.StringIndex
+    BlobOffset : UInt32 @ BlobOffset
+}
+
+sector FLOR : align(32) extends BaseRecord {
+    NameOffset : UInt32 @ FULL.StringIndex
+    EdidOffset : UInt32 @ EDID.StringIndex
+    BlobOffset : UInt32 @ BlobOffset
+}
+
+sector FURN : align(32) extends BaseRecord {
+    NameOffset : UInt32 @ FULL.StringIndex
+    EdidOffset : UInt32 @ EDID.StringIndex
+    BlobOffset : UInt32 @ BlobOffset
+}
+
+sector PERK : align(32) extends BaseRecord {
+    NameOffset : UInt32 @ FULL.StringIndex
+    EdidOffset : UInt32 @ EDID.StringIndex
+    BlobOffset : UInt32 @ BlobOffset
+}
+
+sector QUST : align(32) extends BaseRecord {
+    NameOffset : UInt32 @ FULL.StringIndex
+    EdidOffset : UInt32 @ EDID.StringIndex
+    BlobOffset : UInt32 @ BlobOffset
+}
+
+sector FACT : align(32) extends BaseRecord {
+    NameOffset : UInt32 @ FULL.StringIndex
+    EdidOffset : UInt32 @ EDID.StringIndex
+    BlobOffset : UInt32 @ BlobOffset
+}
+
+// ===================================================================
+//                  SECTORS WITH DEFAULT EMPTY MAPS
+// ===================================================================
+
+sector AACT, ACHR, ACTI, ADDN, ANIO, APPA, ARMA, ARTO, ASPC, ASTP, AVIF, BPTD, CAMS, CELL, CLAS, CLFM, CLMT, COLL, CONT, CPTH, CSTY, DEBR, DIAL, DLBR, DLVW, DOBJ, DOOR, DUAL, ECZN, EFSH, EQUP, EXPL, EYES, FLST, FSTP, FSTS, GLOB, GMST, GRAS, GRUP, HAZD, HDPT, IDLE, IDLM, IMAD, IMGS, INFO, INGR, IPCT, IPDS, KYWD, LAND, LCRT, LCTN, LGTM, LIGH, LSCR, LTEX, LVLN, LVSP, MATO, MATT, MESG, MGEF, MOVT, MSTT, MUSC, MUST, NAVI, NAVM, NOTE, OTFT, PACK, PGRE, PHZD, PROJ, RACE, REGN, RELA, REVB, RFCT, SCEN, SCRL, SHOU, SLGM, SMBN, SMEN, SMQN, SNCT, SNDR, SOPM, SOUN, SPEL, SPGD, TACT, TES4, TREE, TXST, VTYP, WATR, WOOP, WRLD, WTHR extends EmptyRecord

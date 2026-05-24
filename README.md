@@ -21,24 +21,40 @@ When compiling Bethesda plugin files to the BES format, a `B` prefix is added to
 
 A compiled BES file is structured into five distinct segments:
 
-```mermaid
-graph TD
-    classDef header fill:#1a365d,stroke:#2b6cb0,stroke-width:2px,color:#fff;
-    classDef directory fill:#22543d,stroke:#2f855a,stroke-width:2px,color:#fff;
-    classDef arrays fill:#744210,stroke:#975a16,stroke-width:2px,color:#fff;
-    classDef strings fill:#2c5282,stroke:#3182ce,stroke-width:2px,color:#fff;
-    classDef blobs fill:#553c9a,stroke:#6b46c1,stroke-width:2px,color:#fff;
-
-    Header["**Header Segment (24 Bytes)**<br>• Magic Signature: BESM / BES\0 / BES<br>• Version & NumTypes<br>• StringTableOffset & BlobPoolOffset"]:::header
-    Directory["**Record Type Directory**<br>• NumTypes entries (16B each)<br>• Signature: e.g., WEAP, ARMO, CELL<br>• RecordCount & RowSize<br>• Row Array DataOffset"]:::directory
-    Arrays["**Flat Row Arrays (Fixed-Width Columns)**<br>• WEAP: [FormID (4B)][Flags (4B)][Stats...]<br>• ARMO: [FormID (4B)][Flags (4B)][Stats...]<br>• CELL: [FormID (4B)][Flags (4B)][Grid...]"]:::arrays
-    Strings["**String Table**<br>• Concat Null-terminated UTF-8 text<br>• Offset referenced by Flat Row cells<br>• e.g., 'Steel Dagger\0', 'Iron Sword\0'"]:::strings
-    Blobs["**Blob Pool (Binary Heap)**<br>• dynamic length subrecords<br>• size-prefixed: [Size (4B)][Payload Bytes]"]:::blobs
-
-    Header --> Directory
-    Directory --> Arrays
-    Arrays --> Strings
-    Arrays --> Blobs
+```text
+  +-------------------------------------------------------------+
+  |                   Header Segment (24 Bytes)                 |
+  |  - Magic Signature: "BESM", "BES\0", or "BES "              |
+  |  - Version & NumTypes                                       |
+  |  - StringTableOffset & BlobPoolOffset                       |
+  +-------------------------------------------------------------+
+                                 |
+                                 v
+  +-------------------------------------------------------------+
+  |                     Record Type Directory                   |
+  |  - NumTypes entries (16 bytes each)                         |
+  |  - Signature (e.g., "WEAP", "ARMO", "CELL")                 |
+  |  - RecordCount & RowSize                                    |
+  |  - DataOffset (points to start of Flat Row Array)           |
+  +-------------------------------------------------------------+
+                                 |
+                                 v
+  +-------------------------------------------------------------+
+  |              Flat Row Arrays (Fixed-Width Rows)             |
+  |  - WEAP: [FormID (4B)][Flags (4B)][Stats...]                |
+  |  - ARMO: [FormID (4B)][Flags (4B)][Stats...]                |
+  |  - CELL: [FormID (4B)][Flags (4B)][Grid...]                 |
+  +-------------------------------------------------------------+
+                    /                         \
+         (String Offsets)                 (Blob Offsets)
+                  /                             \
+                 v                               v
+  +-----------------------------+   +---------------------------+
+  |         String Table        |   |         Blob Pool         |
+  |  - Concatenated UTF-8 text  |   |  - Dynamic subrecords     |
+  |  - Null-terminated (\0)     |   |  - [Size (4B)][Payload]   |
+  |  - e.g., "Steel Dagger\0"   |   |                           |
+  +-----------------------------+   +---------------------------+
 ```
 
 ---

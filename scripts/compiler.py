@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Vault-Tec Master File Database & Compiler - Python ESM to BESM Compiler
-Converts standard Bethesda Master Files (.esm, .esp, .esl) to the high-performance
-Binary Elder Scrolls Master format (.besm, .besp, .besl) with flat row arrays and O(1) indexing.
+Converts standard Bethesda Master Files (.esm, .esp, .esl) to the 
+Binary Elder Scrolls Master format (.besm, .besp, .besl) 
+with flat row arrays and O(1) indexing.
 Uses the custom .bschema specifications to determine exact row structures dynamically.
 """
 

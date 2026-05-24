@@ -1,8 +1,8 @@
 # Binary Elder Scrolls (BES) Format Specification
-
+**[Buy Me A Coffee](https://buymeacoffee.com/azzodude)** (Broke student, please help me buy dinner!)
 BES is an optimized, read-aligned, binary database file format designed to replace or alternate with the traditional sequential Bethesda Master (`.esm` / `.esp` / `.esl`) file structure. 
 
-👉 **[Compiler](https://azzodude.github.io/bes/)** | **[Buy Me A Coffee](https://buymeacoffee.com/azzodude)** (Broke student, please help me buy dinner!)
+👉 **[Compiler](https://azzodude.github.io/bes/)**
 
 By reorganizing records into structured, fixed-size data blocks and isolating variable-length data, BES enables constant-time $O(1)$ random access to any record field directly from disk or memory mapping.
 

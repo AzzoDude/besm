@@ -1,6 +1,6 @@
 # Binary Elder Scrolls (BES) Format Specification
 
-BES is an optimized, read-aligned, binary database file format designed to alternate with the traditional sequential Bethesda Master (`.esm` / `.esp` / `.esl`) file structure. 
+BES is an optimized, read-aligned, binary database file format designed to replace or alternate with the traditional sequential Bethesda Master (`.esm` / `.esp` / `.esl`) file structure. 
 
 By reorganizing records into structured, fixed-size data blocks and isolating variable-length data, BES enables constant-time $O(1)$ random access to any record field directly from disk or memory mapping.
 
@@ -11,17 +11,26 @@ By reorganizing records into structured, fixed-size data blocks and isolating va
 A compiled BES file is structured into five distinct segments:
 
 ```text
-┌────────────────────────────────────────┐
-│ Header (24 bytes)                      │
-├────────────────────────────────────────┤
-│ Record Type Directory                  │
-├────────────────────────────────────────┤
-│ Flat Row Arrays (Fixed-Size Data)      │
-├────────────────────────────────────────┤
-│ String Table (UTF-8 Characters)        │
-├────────────────────────────────────────┤
-│ Blob Pool (Preserved Binary Blobs)     │
-└────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────┐
+│ Header (24 bytes)                                      │
+│ - Magic Signature: "BESM", "BES\0", or "BES "          │
+│ - Version & Number of Record Types (NumTypes)          │
+│ - String Table Offset & Blob Pool Offset               │
+├────────────────────────────────────────────────────────┤
+│ Record Type Directory (NumTypes entries)               │
+│ - Signature: e.g., "WEAP", "ARMO", "CELL"              │
+│ - RecordCount, RowSize, DataOffset                     │
+├────────────────────────────────────────────────────────┤
+│ Flat Row Arrays (Fixed-Size Data)                      │
+│ - WEAP rows: [FormID (4B)][Flags (4B)][Stats...][Pool] │
+│ - ARMO rows: [FormID (4B)][Flags (4B)][Stats...][Pool] │
+├────────────────────────────────────────────────────────┤
+│ String Table                                           │
+│ - Null-terminated UTF-8 text strings: "Iron Sword\0"   │
+├────────────────────────────────────────────────────────┤
+│ Blob Pool                                              │
+│ - Dynamic length binary blobs: [Size (4B)][Raw Bytes]  │
+└────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -91,3 +100,26 @@ A binary heap containing unparsed subrecords.
 Because each record type's rows are uniform in size, any specific field column $C$ for a record at index $r$ can be addressed instantly without reading preceding records:
 
 $$\text{Absolute Seek Address} = \text{DataOffset} + (r \times \text{RowSize}) + \text{ColumnOffset}$$
+
+---
+
+## Tooling & Setup
+
+To compile and inspect BES files, you can use the built-in compiler script or host the dark-mode web interface.
+
+### Prerequisites
+* [Node.js](https://nodejs.org/) (v16+)
+
+### Installation
+Clone the repository and install dependencies:
+```bash
+git clone https://github.com/AzzoDude/bes
+cd bes
+npm install
+```
+
+### Rebuilding Assets
+After modifying source scripts in the `docs/js` directory, compile the production bundle:
+```bash
+npx esbuild docs/js/app.js --bundle --outfile=docs/js/bundle.js --format=iife
+```

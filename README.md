@@ -2,7 +2,20 @@
 
 BES is an optimized, read-aligned, binary database file format designed to replace or alternate with the traditional sequential Bethesda Master (`.esm` / `.esp` / `.esl`) file structure. 
 
+👉 **[Try the Live Web Viewer & Compiler](https://azzodude.github.io/bes/)**
+
+[![Donate - Buy Me A Coffee](https://img.shields.io/badge/Donate-Buy%20Me%20A%20Coffee-orange.svg)](https://buymeacoffee.com/azzodude)
+
 By reorganizing records into structured, fixed-size data blocks and isolating variable-length data, BES enables constant-time $O(1)$ random access to any record field directly from disk or memory mapping.
+
+---
+
+## File Extensions
+
+When compiling Bethesda plugin files to the BES format, a `B` prefix is added to the original file extension:
+* `.esm` (Master File) ➔ **`.besm`** (Binary Elder Scrolls Master)
+* `.esp` (Plugin File) ➔ **`.besp`** (Binary Elder Scrolls Plugin)
+* `.esl` (Light Master File) ➔ **`.besl`** (Binary Elder Scrolls Light Master)
 
 ---
 
@@ -10,27 +23,24 @@ By reorganizing records into structured, fixed-size data blocks and isolating va
 
 A compiled BES file is structured into five distinct segments:
 
-```text
-┌────────────────────────────────────────────────────────┐
-│ Header (24 bytes)                                      │
-│ - Magic Signature: "BESM", "BES\0", or "BES "          │
-│ - Version & Number of Record Types (NumTypes)          │
-│ - String Table Offset & Blob Pool Offset               │
-├────────────────────────────────────────────────────────┤
-│ Record Type Directory (NumTypes entries)               │
-│ - Signature: e.g., "WEAP", "ARMO", "CELL"              │
-│ - RecordCount, RowSize, DataOffset                     │
-├────────────────────────────────────────────────────────┤
-│ Flat Row Arrays (Fixed-Size Data)                      │
-│ - WEAP rows: [FormID (4B)][Flags (4B)][Stats...][Pool] │
-│ - ARMO rows: [FormID (4B)][Flags (4B)][Stats...][Pool] │
-├────────────────────────────────────────────────────────┤
-│ String Table                                           │
-│ - Null-terminated UTF-8 text strings: "Iron Sword\0"   │
-├────────────────────────────────────────────────────────┤
-│ Blob Pool                                              │
-│ - Dynamic length binary blobs: [Size (4B)][Raw Bytes]  │
-└────────────────────────────────────────────────────────┘
+```mermaid
+graph TD
+    classDef header fill:#1a365d,stroke:#2b6cb0,stroke-width:2px,color:#fff;
+    classDef directory fill:#22543d,stroke:#2f855a,stroke-width:2px,color:#fff;
+    classDef arrays fill:#744210,stroke:#975a16,stroke-width:2px,color:#fff;
+    classDef strings fill:#2c5282,stroke:#3182ce,stroke-width:2px,color:#fff;
+    classDef blobs fill:#553c9a,stroke:#6b46c1,stroke-width:2px,color:#fff;
+
+    Header["**Header Segment (24 Bytes)**<br>• Magic Signature: BESM / BES\0 / BES<br>• Version & NumTypes<br>• StringTableOffset & BlobPoolOffset"]:::header
+    Directory["**Record Type Directory**<br>• NumTypes entries (16B each)<br>• Signature: e.g., WEAP, ARMO, CELL<br>• RecordCount & RowSize<br>• Row Array DataOffset"]:::directory
+    Arrays["**Flat Row Arrays (Fixed-Width Columns)**<br>• WEAP: [FormID (4B)][Flags (4B)][Stats...]<br>• ARMO: [FormID (4B)][Flags (4B)][Stats...]<br>• CELL: [FormID (4B)][Flags (4B)][Grid...]"]:::arrays
+    Strings["**String Table**<br>• Concat Null-terminated UTF-8 text<br>• Offset referenced by Flat Row cells<br>• e.g., 'Steel Dagger\0', 'Iron Sword\0'"]:::strings
+    Blobs["**Blob Pool (Binary Heap)**<br>• dynamic length subrecords<br>• size-prefixed: [Size (4B)][Payload Bytes]"]:::blobs
+
+    Header --> Directory
+    Directory --> Arrays
+    Arrays --> Strings
+    Arrays --> Blobs
 ```
 
 ---
@@ -101,17 +111,12 @@ Because each record type's rows are uniform in size, any specific field column $
 
 $$\text{Absolute Seek Address} = \text{DataOffset} + (r \times \text{RowSize}) + \text{ColumnOffset}$$
 
+<p align="center">
+  <img src="assets/astronaut-meme-always-has-been.webp" alt="Wait, it's all constant-time? Always has been." width="500">
+</p>
+
 ---
 
-## Web Viewer & Compiler Interface
-
-The compiled web interface is located in the `docs` folder. It runs entirely client-side in the browser and requires no server-side backend.
-
-### Hosting
-* **GitHub Pages**: You can host this repository directly using GitHub Pages by setting the source branch to your master/main branch and pointing to the `/docs` folder.
-* **Local Web Server**: Alternatively, you can run a local server inside the `docs` directory:
-  ```bash
-  cd docs
-  python -m http.server 8000
-  ```
-  Then open `http://localhost:8000` in your web browser.
+## Support the Project
+Broke student here! Please help me buy dinner or get some coffee.
+👉 **[Support on Buy Me A Coffee](https://buymeacoffee.com/azzodude)**
